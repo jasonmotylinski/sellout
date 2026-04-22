@@ -3,6 +3,22 @@
 {% block header_title %}{% if item %}Edit Item{% else %}New Item{% endif %}{% endblock %}
 {% block header_action %}<a href="/">← Back</a>{% endblock %}
 {% block content %}
+
+{# Existing images shown OUTSIDE the main form, each has its own tiny delete form #}
+{% if item and images %}
+<div class="existing-images" style="margin-top: 1rem;">
+  {% for img in images %}
+  <div class="img-wrap">
+    <img src="/uploads/{{ img.filename }}" alt="photo">
+    <form method="post" action="/items/{{ item.id }}/images/{{ img.id }}/delete">
+      <button type="submit" class="img-delete-btn" title="Remove photo">×</button>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{# Main form: fields + new photo upload only #}
 <form method="post" enctype="multipart/form-data" style="margin-top: 1rem;">
   <div class="form-group">
     <label for="title">Title</label>
@@ -24,19 +40,7 @@
     </select>
   </div>
   <div class="form-group">
-    <label>Photos</label>
-    {% if images %}
-    <div class="existing-images">
-      {% for img in images %}
-      <div class="img-wrap">
-        <img src="/uploads/{{ img.filename }}" alt="photo">
-        <form method="post" action="/items/{{ item.id }}/images/{{ img.id }}/delete" style="display:inline;">
-          <button type="submit" class="img-delete-btn" title="Remove photo">×</button>
-        </form>
-      </div>
-      {% endfor %}
-    </div>
-    {% endif %}
+    <label>Add Photos</label>
     <div class="upload-area">
       <p>📷 Tap to add photos</p>
       <input type="file" name="images" accept="image/*" capture="environment" multiple id="imageInput">
@@ -45,6 +49,7 @@
   </div>
   <button type="submit" class="btn btn-primary btn-block">Save Item</button>
 </form>
+
 {% if item %}
 <hr class="divider">
 <form method="post" action="/items/{{ item.id }}/delete">
