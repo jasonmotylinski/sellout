@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}For Sale{% endblock %}
+{% block header_title %}For Sale{% endblock %}
+{% block content %}
+{% if not items_with_images %}
+<div class="no-items"><p>No items listed yet. Check back soon!</p></div>
+{% else %}
+{% for item, images in items_with_images %}
+<div class="card">
+  {% if images %}
+  <img class="card-img" src="/uploads/{{ images[0].filename }}" alt="{{ item.title }}">
+  {% else %}
+  <div class="card-img-placeholder">📦</div>
+  {% endif %}
+  <div class="card-body">
+    <h2>{{ item.title }}</h2>
+    {% if item.description %}<p class="card-description">{{ item.description }}</p>{% endif %}
+    <div class="item-footer">
+      <span class="price">${{ "%.2f"|format(item.price) }}</span>
+      <span class="badge badge-{{ item.status }}">{{ item.status }}</span>
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{% if item %}Edit Item{% else %}New Item{% endif %}{% endblock %}
+{% block header_title %}{% if item %}Edit Item{% else %}New Item{% endif %}{% endblock %}
+{% block header_action %}<a href="/">← Back</a>{% endblock %}
+{% block content %}
+<form method="post" enctype="multipart/form-data" style="margin-top: 1rem;">
+  <div class="form-group">
+    <label for="title">Title</label>
+    <input type="text" id="title" name="title" value="{{ item.title if item else '' }}" required placeholder="e.g. Blue sofa">
+  </div>
+  <div class="form-group">
+    <label for="description">Description</label>
+    <textarea id="description" name="description" placeholder="Condition, dimensions, any notes…">{{ item.description if item else '' }}</textarea>
+  </div>
+  <div class="form-group">
+    <label for="price">Price ($)</label>
+    <input type="number" id="price" name="price" step="0.01" min="0" value="{{ item.price if item else '' }}" required placeholder="0.00">
+  </div>
+  <div class="form-group">
+    <label for="status">Status</label>
+    <select id="status" name="status">
+      <option value="available" {% if not item or item.status == 'available' %}selected{% endif %}>Available</option>
+      <option value="sold" {% if item and item.status == 'sold' %}selected{% endif %}>Sold</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>Photos</label>
+    {% if images %}
+    <div class="existing-images">
+      {% for img in images %}
+      <div class="img-wrap">
+        <img src="/uploads/{{ img.filename }}" alt="photo">
+        <form method="post" action="/items/{{ item.id }}/images/{{ img.id }}/delete" style="display:inline;">
+          <button type="submit" class="img-delete-btn" title="Remove photo">×</button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <div class="upload-area">
+      <p>📷 Tap to add photos</p>
+      <input type="file" name="images" accept="image/*" capture="environment" multiple id="imageInput">
+    </div>
+    <div class="new-previews" id="newPreviews"></div>
+  </div>
+  <button type="submit" class="btn btn-primary btn-block">Save Item</button>
+</form>
+{% if item %}
+<hr class="divider">
+<form method="post" action="/items/{{ item.id }}/delete">
+  <button type="submit" class="btn btn-danger btn-block"
+    onclick="return confirm('Delete this item and all its photos?')">Delete Item</button>
+</form>
+{% endif %}
+<script>
+document.getElementById('imageInput').addEventListener('change', function(e) {
+  const preview = document.getElementById('newPreviews');
+  preview.innerHTML = '';
+  Array.from(e.target.files).forEach(function(file) {
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(file);
+    preview.appendChild(img);
+  });
+});
+</script>
+{% endblock %}
