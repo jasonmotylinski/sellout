@@ -92,6 +92,8 @@ async def update_item(
     status: Literal["available", "sold"] = Form("available"),
     images: List[UploadFile] = File(default=[]),
 ):
+    if database.get_item(item_id) is None:
+        raise HTTPException(status_code=404)
     database.update_item(item_id, title=title, description=description, price=price, status=status)
     existing_count = len(database.get_images(item_id))
     for i, image in enumerate(images):
@@ -116,10 +118,9 @@ def delete_item_route(item_id: int):
 
 @app.post("/items/{item_id}/images/{image_id}/delete")
 def delete_image_route(item_id: int, image_id: int):
-    images = database.get_images(item_id)
-    for img in images:
+    for img in database.get_images(item_id):
         if img["id"] == image_id:
             (Path(UPLOADS_DIR) / img["filename"]).unlink(missing_ok=True)
+            database.delete_image(image_id)
             break
-    database.delete_image(image_id)
     return RedirectResponse(f"/items/{item_id}/edit", status_code=303)
