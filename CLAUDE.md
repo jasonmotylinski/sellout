@@ -25,11 +25,11 @@ Dependencies are managed with a venv at `.venv/`. Activate with `source .venv/bi
 The app is a server-rendered FastAPI app with two modules:
 
 - **`database.py`** — thin SQLite wrapper using a module-level `_conn` singleton. `init_db(path)` must be called before any other function. All functions operate on `_conn` directly — no ORM, no dependency injection.
-- **`main.py`** — FastAPI app with Jinja2 templates and `multipart/form-data` routes. Image uploads are stored as files in `UPLOADS_DIR` (default: `uploads/`), served via a static mount at `/uploads`. DB path and uploads dir are configurable via `DB_PATH` and `UPLOADS_DIR` env vars.
+- **`main.py`** — FastAPI app with Jinja2 templates and `multipart/form-data` routes. Image uploads are stored as files in `UPLOADS_DIR` (default: `uploads/`), served via a static mount at `/uploads`. Env vars (`DB_PATH`, `UPLOADS_DIR`, `ADMIN_USER`, `ADMIN_PASS`) are loaded from `.env` via `python-dotenv`.
 
 **Two views:**
-- `/` — admin list (edit/delete controls visible)
-- `/catalog` — public-facing view (no edit controls)
+- `/` — public-facing catalog (no edit controls)
+- `/admin` — admin list with add/edit/delete; all `/admin/*` routes require HTTP basic auth via the `require_admin` dependency (`ADMIN_USER`/`ADMIN_PASS` env vars, default `admin`/`admin`)
 
 **Schema:** `items` (id, title, description, price, status, created_at) + `item_images` (id, item_id, filename, sort_order). Images cascade-delete when their item is deleted.
 
