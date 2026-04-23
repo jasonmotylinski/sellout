@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{% if item %}Edit Item{% else %}New Item{% endif %}{% endblock %}
 {% block header_title %}{% if item %}Edit Item{% else %}New Item{% endif %}{% endblock %}
-{% block header_action %}<a href="/">← Back</a>{% endblock %}
+{% block header_action %}<a href="/admin">← Back</a>{% endblock %}
 {% block content %}
 
 {# Existing images shown OUTSIDE the main form, each has its own tiny delete form #}
@@ -10,7 +10,7 @@
   {% for img in images %}
   <div class="img-wrap">
     <img src="/uploads/{{ img.filename }}" alt="photo">
-    <form method="post" action="/items/{{ item.id }}/images/{{ img.id }}/delete">
+    <form method="post" action="/admin/items/{{ item.id }}/images/{{ img.id }}/delete">
       <button type="submit" class="img-delete-btn" title="Remove photo">×</button>
     </form>
   </div>
@@ -52,7 +52,7 @@
 
 {% if item %}
 <hr class="divider">
-<form method="post" action="/items/{{ item.id }}/delete">
+<form method="post" action="/admin/items/{{ item.id }}/delete">
   <button type="submit" class="btn btn-danger btn-block"
     onclick="return confirm('Delete this item and all its photos?')">Delete Item</button>
 </form>

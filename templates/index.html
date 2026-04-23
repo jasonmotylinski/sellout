@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Admin — Items{% endblock %}
 {% block header_title %}My Items{% endblock %}
-{% block header_action %}<a href="/catalog">Public View →</a>{% endblock %}
+{% block header_action %}<a href="/">Public View →</a>{% endblock %}
 {% block content %}
 <div class="add-btn-wrap">
-  <a href="/items/new" class="btn btn-primary btn-block">+ Add Item</a>
+  <a href="/admin/items/new" class="btn btn-primary btn-block">+ Add Item</a>
 </div>
 {% if not items_with_images %}
 <div class="no-items"><p>No items yet. Tap Add Item to get started.</p></div>
@@ -21,7 +21,7 @@
     {% if item.description %}<p class="card-description">{{ item.description }}</p>{% endif %}
     <div class="item-footer">
       <span class="price">${{ "%.2f"|format(item.price) }}<span class="badge badge-{{ item.status }}">{{ item.status }}</span></span>
-      <a href="/items/{{ item.id }}/edit" class="btn btn-secondary">Edit</a>
+      <a href="/admin/items/{{ item.id }}/edit" class="btn btn-secondary">Edit</a>
     </div>
   </div>
 </div>

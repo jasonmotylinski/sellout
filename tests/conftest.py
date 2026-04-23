@@ -1,5 +1,5 @@
+import base64
 import pytest
-import os
 import database
 from fastapi.testclient import TestClient
 
@@ -11,4 +11,7 @@ def client(tmp_path):
     database.init_db(str(tmp_path / "test.db"))
     import main
     main.UPLOADS_DIR = str(uploads)
-    return TestClient(main.app)
+    main.ADMIN_USER = "test"
+    main.ADMIN_PASS = "test"
+    token = base64.b64encode(b"test:test").decode()
+    return TestClient(main.app, headers={"Authorization": f"Basic {token}"})
