@@ -1,29 +1,33 @@
 {% extends "base.html" %}
-{% block title %}Admin — Items{% endblock %}
-{% block header_title %}My Items{% endblock %}
-{% block header_action %}<a href="/">Public View →</a>{% endblock %}
+{% block title %}Admin — Sellout{% endblock %}
+{% block header_nav %}<a href="/" class="nav-link">Public view</a>{% endblock %}
 {% block content %}
-<div class="add-btn-wrap">
-  <a href="/admin/items/new" class="btn btn-primary btn-block">+ Add Item</a>
+<div class="page-header">
+  <h1 class="page-title">Items</h1>
+  <a href="/admin/items/new" class="btn btn--primary">+ Add item</a>
 </div>
 {% if not items_with_images %}
-<div class="no-items"><p>No items yet. Tap Add Item to get started.</p></div>
+<div class="empty">
+  <p class="empty__text">No items yet.</p>
+</div>
 {% else %}
 {% for item, images in items_with_images %}
-<div class="card">
-  {% if images %}
-  <img class="card-img" src="/uploads/{{ images[0].filename }}" alt="{{ item.title }}">
-  {% else %}
-  <div class="card-img-placeholder">📦</div>
-  {% endif %}
-  <div class="card-body">
-    <h2>{{ item.title }}</h2>
-    {% if item.description %}<p class="card-description">{{ item.description }}</p>{% endif %}
-    <div class="item-footer">
-      <span class="price">${{ "%.2f"|format(item.price) }}<span class="badge badge-{{ item.status }}">{{ item.status }}</span></span>
-      <a href="/admin/items/{{ item.id }}/edit" class="btn btn-secondary">Edit</a>
+<div class="admin-row">
+  <div class="admin-row__thumb">
+    {% if images %}
+    <img src="/uploads/{{ images[0].filename }}" alt="{{ item.title }}">
+    {% else %}
+    <div class="admin-row__thumb-empty">◦</div>
+    {% endif %}
+  </div>
+  <div class="admin-row__body">
+    <div class="admin-row__name">{{ item.title }}</div>
+    <div class="admin-row__meta">
+      <span class="price" style="font-size: 1rem;">${{ "%.2f"|format(item.price) }}</span>
+      <span class="badge badge--{{ item.status }}">{{ item.status }}</span>
     </div>
   </div>
+  <a href="/admin/items/{{ item.id }}/edit" class="btn btn--outline">Edit</a>
 </div>
 {% endfor %}
 {% endif %}

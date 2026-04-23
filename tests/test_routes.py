@@ -6,7 +6,7 @@ def test_catalog_loads(client):
 def test_admin_list_loads(client):
     response = client.get("/admin")
     assert response.status_code == 200
-    assert "Add Item" in response.text
+    assert "Add item" in response.text
 
 
 def test_new_item_form_loads(client):

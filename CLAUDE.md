@@ -35,6 +35,15 @@ The app is a server-rendered FastAPI app with two modules:
 
 **Templates** all extend `templates/base.html`, which includes all CSS inline (no external stylesheet or JS framework).
 
+## Design Context
+
+Full context is in `.impeccable.md`. Summary:
+
+- **Aesthetic**: Warm editorial boutique — cream background, espresso text, Cormorant Garamond serif for titles/prices, DM Sans for body/labels
+- **Inspiration**: EBTH.com, Chairish, 1stDibs — photography-forward, generous white space, restrained UI
+- **Palette**: oklch-based warm creams, espresso, brass undertones. No dark mode. No pure black/white.
+- **Principles**: photography first, warmth over sterility, restraint, mobile-native
+
 ## Testing
 
 Tests use `pytest` with `FastAPI`'s `TestClient` (backed by `httpx`). The `client` fixture in `conftest.py` calls `database.init_db()` with a `tmp_path` database and patches `main.UPLOADS_DIR` to a temp directory — no disk or DB state leaks between tests. `test_database.py` uses an `autouse` fixture to reinitialize the DB per test.
