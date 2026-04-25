@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import List, Literal
 
 import pillow_heif
-from PIL import Image
+from PIL import Image, ImageOps
 pillow_heif.register_heif_opener()
 
 from fastapi import Depends, FastAPI, HTTPException, Request, UploadFile, File, Form
@@ -53,6 +53,7 @@ TARGET_BYTES = 500 * 1024
 
 def _compress_bytes(img: Image.Image, fmt: str) -> bytes:
     """Re-encode img at decreasing quality until under TARGET_BYTES."""
+    img = ImageOps.exif_transpose(img)
     if img.mode in ("RGBA", "P", "LA"):
         img = img.convert("RGB")
     for quality in range(85, 39, -5):

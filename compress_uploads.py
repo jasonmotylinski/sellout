@@ -8,7 +8,7 @@ import io
 import sys
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageOps
 
 TARGET_BYTES = 500 * 1024
 EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
@@ -19,9 +19,9 @@ def compress(path: Path) -> tuple[int, int]:
     if original_size <= TARGET_BYTES:
         return original_size, original_size
 
-    img = Image.open(path)
+    img = ImageOps.exif_transpose(Image.open(path))
 
-    # Strip EXIF and convert palette/RGBA to RGB for JPEG output
+    # Convert palette/RGBA to RGB for JPEG output
     if img.mode in ("RGBA", "P", "LA"):
         img = img.convert("RGB")
 
