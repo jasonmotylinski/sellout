@@ -85,6 +85,12 @@
     @media (min-width: 500px) {
       .item-grid { grid-template-columns: 1fr 1fr; gap: 2.5rem 1.5rem; }
     }
+    @media (min-width: 900px) {
+      .item-grid { grid-template-columns: repeat(3, 1fr); gap: 2.5rem 1.5rem; }
+    }
+    @media (min-width: 1280px) {
+      .item-grid { grid-template-columns: repeat(4, 1fr); gap: 2.5rem 2rem; }
+    }
 
     /* ── Item card ──────────────────────────────── */
     .item-card { display: flex; flex-direction: column; }
