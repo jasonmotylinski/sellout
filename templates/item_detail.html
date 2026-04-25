@@ -35,6 +35,7 @@
     <div class="detail-price-row">
       <span class="price">${{ "%.2f"|format(item.price) }}</span>
       <span class="badge badge--{{ item.status }}">{{ item.status }}</span>
+      <button class="heart-btn heart-btn--detail" data-id="{{ item.id }}" aria-label="Save {{ item.title }}" aria-pressed="false">♡</button>
     </div>
     {% if item.description %}
     <p class="detail-desc">{{ item.description }}</p>
@@ -48,6 +49,31 @@
 </div>
 
 <script>
+  // Favorites
+  (function () {
+    var KEY = 'moo_favs';
+    function getFavs() { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { return []; } }
+    function setFavs(ids) { localStorage.setItem(KEY, JSON.stringify(ids)); }
+    var btn = document.querySelector('.heart-btn--detail');
+    if (!btn) return;
+    var id = parseInt(btn.dataset.id);
+    var favs = getFavs();
+    var active = favs.indexOf(id) !== -1;
+    btn.textContent = active ? '♥' : '♡';
+    btn.setAttribute('aria-pressed', String(active));
+    if (active) btn.classList.add('is-fav');
+    btn.addEventListener('click', function () {
+      var f = getFavs();
+      var idx = f.indexOf(id);
+      if (idx === -1) f.push(id); else f.splice(idx, 1);
+      setFavs(f);
+      var now = f.indexOf(id) !== -1;
+      btn.textContent = now ? '♥' : '♡';
+      btn.setAttribute('aria-pressed', String(now));
+      btn.classList.toggle('is-fav', now);
+    });
+  }());
+
   document.addEventListener('DOMContentLoaded', function () {
     var mainImg = document.getElementById('main-img');
     if (!mainImg) return;

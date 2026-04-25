@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Moving On Out{% endblock %}
+{% block header_nav %}<button class="nav-link fav-filter" id="favFilter" aria-pressed="false">♡ Saved</button>{% endblock %}
 {% block content %}
 {% if not items_with_images %}
 <div class="empty">
@@ -17,6 +18,7 @@
     <div class="item-card__placeholder">◦</div>
     {% endif %}
   </div>
+  <button class="heart-btn" data-id="{{ item.id }}" aria-label="Save {{ item.title }}" aria-pressed="false">♡</button>
   <h2 class="item-card__title">{{ item.title }}</h2>
   {% if item.description %}<p class="item-card__desc">{{ item.description }}</p>{% endif %}
   <div class="item-card__footer">
@@ -28,4 +30,68 @@
 {% endfor %}
 </div>
 {% endif %}
+
+<script>
+(function () {
+  var KEY = 'moo_favs';
+
+  function getFavs() {
+    try { return JSON.parse(localStorage.getItem(KEY)) || []; }
+    catch (e) { return []; }
+  }
+
+  function setFavs(ids) { localStorage.setItem(KEY, JSON.stringify(ids)); }
+
+  function toggleFav(id) {
+    var favs = getFavs();
+    var idx = favs.indexOf(id);
+    if (idx === -1) favs.push(id); else favs.splice(idx, 1);
+    setFavs(favs);
+    return getFavs();
+  }
+
+  function applyHeart(btn, active) {
+    btn.textContent = active ? '♥' : '♡';
+    btn.setAttribute('aria-pressed', String(active));
+    btn.classList.toggle('is-fav', active);
+  }
+
+  // Init hearts from storage
+  var favs = getFavs();
+  document.querySelectorAll('.heart-btn').forEach(function (btn) {
+    applyHeart(btn, favs.indexOf(parseInt(btn.dataset.id)) !== -1);
+  });
+
+  // Heart clicks
+  var filterActive = false;
+  document.querySelectorAll('.heart-btn').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var id = parseInt(btn.dataset.id);
+      var newFavs = toggleFav(id);
+      var active = newFavs.indexOf(id) !== -1;
+      applyHeart(btn, active);
+      if (filterActive && !active) {
+        btn.closest('.item-card-link').style.display = 'none';
+      }
+    });
+  });
+
+  // Saved filter
+  var filterBtn = document.getElementById('favFilter');
+  filterBtn.addEventListener('click', function () {
+    filterActive = !filterActive;
+    filterBtn.setAttribute('aria-pressed', String(filterActive));
+    filterBtn.classList.toggle('fav-filter--active', filterActive);
+    filterBtn.textContent = filterActive ? '♥ Saved' : '♡ Saved';
+    var currentFavs = getFavs();
+    document.querySelectorAll('.item-card-link').forEach(function (card) {
+      var btn = card.querySelector('.heart-btn');
+      var id = btn ? parseInt(btn.dataset.id) : null;
+      card.style.display = (filterActive && currentFavs.indexOf(id) === -1) ? 'none' : '';
+    });
+  });
+}());
+</script>
 {% endblock %}
