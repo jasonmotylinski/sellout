@@ -129,6 +129,26 @@ def api_update_item(item_id: int, patch: ItemPatch, _=Depends(require_api_key)):
     return dict(database.get_item(item_id))
 
 
+@app.get("/api/items/{item_id}/images")
+def api_get_images(item_id: int, _=Depends(require_api_key)):
+    if database.get_item(item_id) is None:
+        raise HTTPException(status_code=404)
+    return [dict(img) for img in database.get_images(item_id)]
+
+
+@app.post("/api/items/{item_id}/images/{image_id}/rotate")
+def api_rotate_image(item_id: int, image_id: int, degrees: int = 90, _=Depends(require_api_key)):
+    images = database.get_images(item_id)
+    img_row = next((i for i in images if i["id"] == image_id), None)
+    if img_row is None:
+        raise HTTPException(status_code=404)
+    path = Path(UPLOADS_DIR) / img_row["filename"]
+    img = Image.open(path)
+    img = img.rotate(-degrees, expand=True)
+    img.save(path)
+    return {"id": image_id, "filename": img_row["filename"], "rotated_degrees": degrees}
+
+
 # ── HTML ─────────────────────────────────────────
 
 @app.get("/", response_class=HTMLResponse)
