@@ -207,8 +207,36 @@
     }
     .heart-btn--detail:hover { transform: scale(1.05); }
 
-    .fav-filter { background: none; border: none; cursor: pointer; }
-    .fav-filter--active { color: oklch(55% 0.18 15) !important; }
+    .filter-bar {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0;
+    }
+    .filter-tab {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      padding: 0.5rem 0.9rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .filter-tab:hover { color: var(--espresso); }
+    .filter-tab--active { color: var(--espresso); border-bottom-color: var(--espresso); }
+    .filter-empty {
+      text-align: center;
+      padding: 4rem 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
 
     /* ── Buttons ────────────────────────────────── */
     .btn {

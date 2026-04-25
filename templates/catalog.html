@@ -1,13 +1,18 @@
 {% extends "base.html" %}
 {% block title %}Moving On Out{% endblock %}
-{% block header_nav %}<button class="nav-link fav-filter" id="favFilter" aria-pressed="false">♡ Saved</button>{% endblock %}
 {% block content %}
 {% if not items_with_images %}
 <div class="empty">
   <p class="empty__text">Nothing listed just yet — check back soon.</p>
 </div>
 {% else %}
-<div class="item-grid">
+
+<div class="filter-bar" role="tablist">
+  <button class="filter-tab filter-tab--active" id="tabAll" role="tab" aria-selected="true">All items</button>
+  <button class="filter-tab" id="tabFavs" role="tab" aria-selected="false">My favorites</button>
+</div>
+
+<div class="item-grid" id="itemGrid">
 {% for item, images in items_with_images %}
 <a href="/items/{{ item.id }}" class="item-card-link" aria-label="{{ item.title }}">
 <article class="item-card{% if item.status == 'sold' %} item-card--sold{% endif %}">
@@ -29,6 +34,11 @@
 </a>
 {% endfor %}
 </div>
+
+<div class="filter-empty" id="favsEmpty" style="display:none">
+  <p>No saved items yet — heart the ones you like.</p>
+</div>
+
 {% endif %}
 
 <script>
@@ -42,55 +52,72 @@
 
   function setFavs(ids) { localStorage.setItem(KEY, JSON.stringify(ids)); }
 
-  function toggleFav(id) {
-    var favs = getFavs();
-    var idx = favs.indexOf(id);
-    if (idx === -1) favs.push(id); else favs.splice(idx, 1);
-    setFavs(favs);
-    return getFavs();
-  }
-
   function applyHeart(btn, active) {
     btn.textContent = active ? '♥' : '♡';
     btn.setAttribute('aria-pressed', String(active));
     btn.classList.toggle('is-fav', active);
   }
 
-  // Init hearts from storage
+  var showingFavs = false;
+
+  function applyFilter() {
+    var favs = getFavs();
+    var anyVisible = false;
+    document.querySelectorAll('.item-card-link').forEach(function (card) {
+      var id = parseInt(card.querySelector('.heart-btn').dataset.id);
+      var show = !showingFavs || favs.indexOf(id) !== -1;
+      card.style.display = show ? '' : 'none';
+      if (show) anyVisible = true;
+    });
+    document.getElementById('favsEmpty').style.display = (showingFavs && !anyVisible) ? '' : 'none';
+  }
+
+  // Init hearts
   var favs = getFavs();
   document.querySelectorAll('.heart-btn').forEach(function (btn) {
     applyHeart(btn, favs.indexOf(parseInt(btn.dataset.id)) !== -1);
   });
 
   // Heart clicks
-  var filterActive = false;
   document.querySelectorAll('.heart-btn').forEach(function (btn) {
     btn.addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
       var id = parseInt(btn.dataset.id);
-      var newFavs = toggleFav(id);
-      var active = newFavs.indexOf(id) !== -1;
+      var f = getFavs();
+      var idx = f.indexOf(id);
+      if (idx === -1) f.push(id); else f.splice(idx, 1);
+      setFavs(f);
+      var active = f.indexOf(id) !== -1;
       applyHeart(btn, active);
-      if (filterActive && !active) {
-        btn.closest('.item-card-link').style.display = 'none';
-      }
+      if (showingFavs) applyFilter();
     });
   });
 
-  // Saved filter
-  var filterBtn = document.getElementById('favFilter');
-  filterBtn.addEventListener('click', function () {
-    filterActive = !filterActive;
-    filterBtn.setAttribute('aria-pressed', String(filterActive));
-    filterBtn.classList.toggle('fav-filter--active', filterActive);
-    filterBtn.textContent = filterActive ? '♥ Saved' : '♡ Saved';
-    var currentFavs = getFavs();
-    document.querySelectorAll('.item-card-link').forEach(function (card) {
-      var btn = card.querySelector('.heart-btn');
-      var id = btn ? parseInt(btn.dataset.id) : null;
-      card.style.display = (filterActive && currentFavs.indexOf(id) === -1) ? 'none' : '';
-    });
+  // Tab switching
+  var tabAll  = document.getElementById('tabAll');
+  var tabFavs = document.getElementById('tabFavs');
+
+  tabAll.addEventListener('click', function () {
+    if (showingFavs) {
+      showingFavs = false;
+      tabAll.classList.add('filter-tab--active');
+      tabAll.setAttribute('aria-selected', 'true');
+      tabFavs.classList.remove('filter-tab--active');
+      tabFavs.setAttribute('aria-selected', 'false');
+      applyFilter();
+    }
+  });
+
+  tabFavs.addEventListener('click', function () {
+    if (!showingFavs) {
+      showingFavs = true;
+      tabFavs.classList.add('filter-tab--active');
+      tabFavs.setAttribute('aria-selected', 'true');
+      tabAll.classList.remove('filter-tab--active');
+      tabAll.setAttribute('aria-selected', 'false');
+      applyFilter();
+    }
   });
 }());
 </script>
