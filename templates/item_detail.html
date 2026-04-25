@@ -1,7 +1,60 @@
 {% extends "base.html" %}
 {% block title %}{{ item.title }} — Sellout{% endblock %}
+{% block header_nav %}
+<a href="/" class="nav-link">← All items</a>
+{% endblock %}
 {% block content %}
-<h1>{{ item.title }}</h1>
-<p>{{ item.description }}</p>
-<p>${{ "%.2f"|format(item.price) }}</p>
+<div class="detail-layout">
+
+  <div class="detail-images">
+    {% if images %}
+    <div class="detail-main-img">
+      <img id="main-img" src="/uploads/{{ images[0].filename }}" alt="{{ item.title }}">
+    </div>
+    {% if images|length > 1 %}
+    <div class="thumb-strip">
+      {% for img in images %}
+      <button
+        class="thumb{% if loop.first %} thumb--active{% endif %}"
+        data-src="/uploads/{{ img.filename }}"
+        aria-label="View image {{ loop.index }}"
+      >
+        <img src="/uploads/{{ img.filename }}" alt="">
+      </button>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="detail-main-img detail-main-img--empty">◦</div>
+    {% endif %}
+  </div>
+
+  <div class="detail-info">
+    <h1 class="detail-title">{{ item.title }}</h1>
+    <div class="detail-price-row">
+      <span class="price">${{ "%.2f"|format(item.price) }}</span>
+      <span class="badge badge--{{ item.status }}">{{ item.status }}</span>
+    </div>
+    {% if item.description %}
+    <p class="detail-desc">{{ item.description }}</p>
+    {% endif %}
+  </div>
+
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var mainImg = document.getElementById('main-img');
+    if (!mainImg) return;
+    document.querySelectorAll('.thumb').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        mainImg.src = btn.dataset.src;
+        document.querySelectorAll('.thumb').forEach(function (b) {
+          b.classList.remove('thumb--active');
+        });
+        btn.classList.add('thumb--active');
+      });
+    });
+  });
+</script>
 {% endblock %}
