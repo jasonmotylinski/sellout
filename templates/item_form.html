@@ -44,11 +44,9 @@
   </div>
   <div class="form-row">
     <label class="form-label">Photos</label>
-    <div class="upload-zone">
-      <p>Tap to add photos</p>
-      <input type="file" name="images" accept="image/*" multiple id="imageInput">
-    </div>
     <div class="preview-grid" id="newPreviews"></div>
+    <input type="file" name="images" accept="image/*" multiple id="imageInput" style="display:none">
+    <button type="button" class="btn btn--outline btn--block" id="addPhotosBtn">Add photos</button>
   </div>
   <button type="submit" class="btn btn--primary btn--block">Save item</button>
 </form>
@@ -62,14 +60,60 @@
 {% endif %}
 
 <script>
-document.getElementById('imageInput').addEventListener('change', function(e) {
-  const preview = document.getElementById('newPreviews');
-  preview.innerHTML = '';
-  Array.from(e.target.files).forEach(function(file) {
-    const img = document.createElement('img');
-    img.src = URL.createObjectURL(file);
-    preview.appendChild(img);
+(function () {
+  var accumulated = [];
+  var input = document.getElementById('imageInput');
+  var addBtn = document.getElementById('addPhotosBtn');
+  var preview = document.getElementById('newPreviews');
+
+  addBtn.addEventListener('click', function () {
+    input.value = ''; // reset so re-picking the same file still fires 'change'
+    input.click();
   });
-});
+
+  input.addEventListener('change', function (e) {
+    Array.from(e.target.files).forEach(function (file) {
+      var dup = accumulated.some(function (f) {
+        return f.name === file.name && f.size === file.size && f.lastModified === file.lastModified;
+      });
+      if (!dup) accumulated.push(file);
+    });
+    syncInput();
+    render();
+  });
+
+  function syncInput() {
+    var dt = new DataTransfer();
+    accumulated.forEach(function (f) { dt.items.add(f); });
+    input.files = dt.files;
+  }
+
+  function render() {
+    preview.querySelectorAll('img').forEach(function (img) {
+      URL.revokeObjectURL(img.src);
+    });
+    preview.innerHTML = '';
+    accumulated.forEach(function (file, idx) {
+      var wrap = document.createElement('div');
+      wrap.className = 'img-grid__item';
+      var img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      var del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'img-del';
+      del.title = 'Remove';
+      del.textContent = '×';
+      del.addEventListener('click', function () {
+        URL.revokeObjectURL(img.src);
+        accumulated.splice(idx, 1);
+        syncInput();
+        render();
+      });
+      wrap.appendChild(img);
+      wrap.appendChild(del);
+      preview.appendChild(wrap);
+    });
+  }
+}());
 </script>
 {% endblock %}
