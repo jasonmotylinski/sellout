@@ -88,3 +88,13 @@ def test_set_cover_image(client):
     assert response.status_code == 303
     images = database.get_images(1)
     assert images[0]["id"] == img_b
+
+
+def test_set_cover_image_wrong_image_returns_404(client):
+    client.post("/admin/items/new", data={"title": "Bench", "description": "", "price": "15.00", "status": "available"})
+    import database
+    database.add_image(1, "a.jpg", sort_order=0)
+
+    response = client.post("/admin/items/1/images/9999/set-cover", follow_redirects=False)
+
+    assert response.status_code == 404
