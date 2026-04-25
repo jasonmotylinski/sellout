@@ -50,6 +50,19 @@ def public_catalog(request: Request):
     })
 
 
+@app.get("/items/{item_id}", response_class=HTMLResponse)
+def item_detail(item_id: int, request: Request):
+    row = database.get_item(item_id)
+    if row is None:
+        raise HTTPException(status_code=404)
+    item = dict(row)
+    images = [dict(img) for img in database.get_images(item_id)]
+    return templates.TemplateResponse(request, "item_detail.html", {
+        "item": item,
+        "images": images,
+    })
+
+
 @app.get("/admin", response_class=HTMLResponse)
 def admin_list(request: Request, _=Depends(require_admin)):
     return templates.TemplateResponse(request, "index.html", {

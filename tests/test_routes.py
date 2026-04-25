@@ -55,3 +55,17 @@ def test_delete_item(client):
     client.post("/admin/items/1/delete")
     response = client.get("/admin")
     assert "Gone" not in response.text
+
+
+def test_item_detail_loads(client):
+    client.post("/admin/items/new", data={"title": "Vase", "description": "Blue ceramic", "price": "45.00", "status": "available"})
+    response = client.get("/items/1")
+    assert response.status_code == 200
+    assert "Vase" in response.text
+    assert "Blue ceramic" in response.text
+    assert "45.00" in response.text
+
+
+def test_item_detail_404(client):
+    response = client.get("/items/999")
+    assert response.status_code == 404

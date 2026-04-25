@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}{{ item.title }} — Sellout{% endblock %}
+{% block content %}
+<h1>{{ item.title }}</h1>
+<p>{{ item.description }}</p>
+<p>${{ "%.2f"|format(item.price) }}</p>
+{% endblock %}
