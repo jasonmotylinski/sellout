@@ -1,3 +1,4 @@
+import io
 import os
 import secrets
 import uuid
@@ -6,6 +7,10 @@ from dotenv import load_dotenv
 load_dotenv()
 from pathlib import Path
 from typing import List, Literal
+
+import pillow_heif
+from PIL import Image
+pillow_heif.register_heif_opener()
 
 from fastapi import Depends, FastAPI, HTTPException, Request, UploadFile, File, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -41,6 +46,17 @@ templates = Jinja2Templates(directory="templates")
 def _items_with_images():
     items = database.list_items()
     return [(dict(item), [dict(img) for img in database.get_images(item["id"])]) for item in items]
+
+
+async def _save_image(upload: UploadFile, dest: Path, ext: str):
+    data = await upload.read()
+    if ext == ".heic":
+        img = Image.open(io.BytesIO(data))
+        dest = dest.with_suffix(".jpg")
+        img.save(dest, format="JPEG", quality=90)
+    else:
+        dest.write_bytes(data)
+    return dest.name
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -93,9 +109,7 @@ async def create_item(
             ext = Path(image.filename).suffix.lower()
             if ext not in ALLOWED_IMAGE_EXTENSIONS:
                 ext = ".jpg"
-            filename = f"{uuid.uuid4().hex}{ext}"
-            dest = Path(UPLOADS_DIR) / filename
-            dest.write_bytes(await image.read())
+            filename = await _save_image(image, Path(UPLOADS_DIR) / f"{uuid.uuid4().hex}{ext}", ext)
             database.add_image(item_id, filename=filename, sort_order=i)
     return RedirectResponse("/admin", status_code=303)
 
@@ -132,9 +146,7 @@ async def update_item(
             ext = Path(image.filename).suffix.lower()
             if ext not in ALLOWED_IMAGE_EXTENSIONS:
                 ext = ".jpg"
-            filename = f"{uuid.uuid4().hex}{ext}"
-            dest = Path(UPLOADS_DIR) / filename
-            dest.write_bytes(await image.read())
+            filename = await _save_image(image, Path(UPLOADS_DIR) / f"{uuid.uuid4().hex}{ext}", ext)
             database.add_image(item_id, filename=filename, sort_order=existing_count + i)
     return RedirectResponse(f"/admin/items/{item_id}/edit", status_code=303)
 

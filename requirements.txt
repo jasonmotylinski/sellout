@@ -5,3 +5,5 @@ python-multipart
 python-dotenv
 pytest
 httpx
+Pillow
+pillow-heif
