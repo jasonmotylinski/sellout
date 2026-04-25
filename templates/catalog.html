@@ -7,14 +7,26 @@
 </div>
 {% else %}
 
-<div class="filter-bar" role="tablist">
-  <button class="filter-tab filter-tab--active" id="tabAll" role="tab" aria-selected="true">All items</button>
-  <button class="filter-tab" id="tabFavs" role="tab" aria-selected="false">My favorites</button>
+<div class="filter-bar">
+  <div class="filter-tabs" role="tablist">
+    <button class="filter-tab filter-tab--active" id="tabAll" role="tab" aria-selected="true">All items</button>
+    <button class="filter-tab" id="tabFavs" role="tab" aria-selected="false">My favorites</button>
+  </div>
+  <select class="sort-select" id="sortSelect" aria-label="Sort items">
+    <option value="default">Sort</option>
+    <option value="price-asc">Price: low to high</option>
+    <option value="price-desc">Price: high to low</option>
+    <option value="alpha-asc">A → Z</option>
+    <option value="alpha-desc">Z → A</option>
+  </select>
 </div>
 
 <div class="item-grid" id="itemGrid">
 {% for item, images in items_with_images %}
-<a href="/items/{{ item.id }}" class="item-card-link" aria-label="{{ item.title }}">
+<a href="/items/{{ item.id }}" class="item-card-link"
+   aria-label="{{ item.title }}"
+   data-price="{{ item.price }}"
+   data-title="{{ item.title | lower }}">
 <article class="item-card{% if item.status == 'sold' %} item-card--sold{% endif %}">
   <div class="item-card__img">
     {% if images %}
@@ -44,12 +56,14 @@
 <script>
 (function () {
   var KEY = 'moo_favs';
+  var grid = document.getElementById('itemGrid');
+  var showingFavs = false;
+  var currentSort = 'default';
 
   function getFavs() {
     try { return JSON.parse(localStorage.getItem(KEY)) || []; }
     catch (e) { return []; }
   }
-
   function setFavs(ids) { localStorage.setItem(KEY, JSON.stringify(ids)); }
 
   function applyHeart(btn, active) {
@@ -58,18 +72,40 @@
     btn.classList.toggle('is-fav', active);
   }
 
-  var showingFavs = false;
+  function getCards() {
+    return Array.from(grid.querySelectorAll('.item-card-link'));
+  }
 
-  function applyFilter() {
+  function sortCards(cards, mode) {
+    if (mode === 'default') return cards;
+    return cards.slice().sort(function (a, b) {
+      if (mode === 'price-asc')  return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+      if (mode === 'price-desc') return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+      if (mode === 'alpha-asc')  return a.dataset.title < b.dataset.title ? -1 : 1;
+      if (mode === 'alpha-desc') return a.dataset.title > b.dataset.title ? -1 : 1;
+      return 0;
+    });
+  }
+
+  function render() {
     var favs = getFavs();
+    var cards = getCards();
+
+    // Sort into correct order in DOM
+    var sorted = sortCards(cards, currentSort);
+    sorted.forEach(function (card) { grid.appendChild(card); });
+
+    // Apply filter visibility
     var anyVisible = false;
-    document.querySelectorAll('.item-card-link').forEach(function (card) {
+    getCards().forEach(function (card) {
       var id = parseInt(card.querySelector('.heart-btn').dataset.id);
       var show = !showingFavs || favs.indexOf(id) !== -1;
       card.style.display = show ? '' : 'none';
       if (show) anyVisible = true;
     });
-    document.getElementById('favsEmpty').style.display = (showingFavs && !anyVisible) ? '' : 'none';
+
+    document.getElementById('favsEmpty').style.display =
+      (showingFavs && !anyVisible) ? '' : 'none';
   }
 
   // Init hearts
@@ -88,9 +124,8 @@
       var idx = f.indexOf(id);
       if (idx === -1) f.push(id); else f.splice(idx, 1);
       setFavs(f);
-      var active = f.indexOf(id) !== -1;
-      applyHeart(btn, active);
-      if (showingFavs) applyFilter();
+      applyHeart(btn, f.indexOf(id) !== -1);
+      if (showingFavs) render();
     });
   });
 
@@ -99,25 +134,29 @@
   var tabFavs = document.getElementById('tabFavs');
 
   tabAll.addEventListener('click', function () {
-    if (showingFavs) {
-      showingFavs = false;
-      tabAll.classList.add('filter-tab--active');
-      tabAll.setAttribute('aria-selected', 'true');
-      tabFavs.classList.remove('filter-tab--active');
-      tabFavs.setAttribute('aria-selected', 'false');
-      applyFilter();
-    }
+    if (!showingFavs) return;
+    showingFavs = false;
+    tabAll.classList.add('filter-tab--active');
+    tabAll.setAttribute('aria-selected', 'true');
+    tabFavs.classList.remove('filter-tab--active');
+    tabFavs.setAttribute('aria-selected', 'false');
+    render();
   });
 
   tabFavs.addEventListener('click', function () {
-    if (!showingFavs) {
-      showingFavs = true;
-      tabFavs.classList.add('filter-tab--active');
-      tabFavs.setAttribute('aria-selected', 'true');
-      tabAll.classList.remove('filter-tab--active');
-      tabAll.setAttribute('aria-selected', 'false');
-      applyFilter();
-    }
+    if (showingFavs) return;
+    showingFavs = true;
+    tabFavs.classList.add('filter-tab--active');
+    tabFavs.setAttribute('aria-selected', 'true');
+    tabAll.classList.remove('filter-tab--active');
+    tabAll.setAttribute('aria-selected', 'false');
+    render();
+  });
+
+  // Sort
+  document.getElementById('sortSelect').addEventListener('change', function () {
+    currentSort = this.value;
+    render();
   });
 }());
 </script>
