@@ -8,7 +8,7 @@
 
   <div class="detail-images">
     {% if images %}
-    <div class="detail-main-img">
+    <div class="detail-main-img detail-main-img--zoomable" id="main-img-wrap">
       <img id="main-img" src="/uploads/{{ images[0].filename }}" alt="{{ item.title }}">
     </div>
     {% if images|length > 1 %}
@@ -43,10 +43,16 @@
 
 </div>
 
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image zoom" style="display:none">
+  <img class="lightbox__img" id="lightbox-img" src="" alt="">
+</div>
+
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     var mainImg = document.getElementById('main-img');
     if (!mainImg) return;
+
+    // Thumbnail switching
     document.querySelectorAll('.thumb').forEach(function (btn) {
       btn.addEventListener('click', function () {
         mainImg.src = btn.dataset.src;
@@ -57,6 +63,35 @@
         btn.classList.add('thumb--active');
         btn.setAttribute('aria-pressed', 'true');
       });
+    });
+
+    // Lightbox
+    var lightbox = document.getElementById('lightbox');
+    var lightboxImg = document.getElementById('lightbox-img');
+
+    function openLightbox() {
+      lightboxImg.src = mainImg.src;
+      lightboxImg.alt = mainImg.alt;
+      lightbox.style.display = 'flex';
+      requestAnimationFrame(function () {
+        lightbox.classList.add('is-open');
+      });
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove('is-open');
+      lightbox.addEventListener('transitionend', function handler() {
+        lightbox.style.display = 'none';
+        lightbox.removeEventListener('transitionend', handler);
+      });
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('main-img-wrap').addEventListener('click', openLightbox);
+    lightbox.addEventListener('click', closeLightbox);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && lightbox.classList.contains('is-open')) closeLightbox();
     });
   });
 </script>
