@@ -96,6 +96,7 @@ async def _save_image(upload: UploadFile, dest: Path, ext: str):
 class ItemPatch(BaseModel):
     title: str | None = None
     description: str | None = None
+    price: float | None = None
 
 
 @app.get("/api/items")
@@ -122,7 +123,7 @@ def api_update_item(item_id: int, patch: ItemPatch, _=Depends(require_api_key)):
         item_id,
         title=patch.title if patch.title is not None else item["title"],
         description=patch.description if patch.description is not None else item["description"],
-        price=item["price"],
+        price=patch.price if patch.price is not None else item["price"],
         status=item["status"],
     )
     return dict(database.get_item(item_id))
