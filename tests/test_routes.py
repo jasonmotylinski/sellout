@@ -1,3 +1,6 @@
+import database
+
+
 def test_catalog_loads(client):
     response = client.get("/")
     assert response.status_code == 200
@@ -79,7 +82,6 @@ def test_catalog_cards_link_to_detail(client):
 
 def test_set_cover_image(client):
     client.post("/admin/items/new", data={"title": "Shelf", "description": "", "price": "20.00", "status": "available"})
-    import database
     img_a = database.add_image(1, "a.jpg", sort_order=0)
     img_b = database.add_image(1, "b.jpg", sort_order=1)
 
@@ -92,9 +94,14 @@ def test_set_cover_image(client):
 
 def test_set_cover_image_wrong_image_returns_404(client):
     client.post("/admin/items/new", data={"title": "Bench", "description": "", "price": "15.00", "status": "available"})
-    import database
     database.add_image(1, "a.jpg", sort_order=0)
 
     response = client.post("/admin/items/1/images/9999/set-cover", follow_redirects=False)
+
+    assert response.status_code == 404
+
+
+def test_set_cover_image_nonexistent_item_returns_404(client):
+    response = client.post("/admin/items/999/images/1/set-cover", follow_redirects=False)
 
     assert response.status_code == 404
