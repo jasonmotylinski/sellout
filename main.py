@@ -48,6 +48,24 @@ def _items_with_images():
     return [(dict(item), [dict(img) for img in database.get_images(item["id"])]) for item in items]
 
 
+TARGET_BYTES = 500 * 1024
+
+
+def _compress_bytes(img: Image.Image, fmt: str) -> bytes:
+    """Re-encode img at decreasing quality until under TARGET_BYTES."""
+    if img.mode in ("RGBA", "P", "LA"):
+        img = img.convert("RGB")
+    for quality in range(85, 39, -5):
+        buf = io.BytesIO()
+        kwargs: dict = {"format": fmt, "optimize": True}
+        if fmt in ("JPEG", "WEBP"):
+            kwargs["quality"] = quality
+        img.save(buf, **kwargs)
+        if buf.tell() <= TARGET_BYTES or fmt not in ("JPEG", "WEBP"):
+            return buf.getvalue()
+    return buf.getvalue()
+
+
 async def _save_image(upload: UploadFile, dest: Path, ext: str):
     data = await upload.read()
     is_heic = (
@@ -55,12 +73,13 @@ async def _save_image(upload: UploadFile, dest: Path, ext: str):
         or (upload.content_type or "").lower() in {"image/heic", "image/heif"}
         or pillow_heif.is_supported(io.BytesIO(data))
     )
+    img = Image.open(io.BytesIO(data))
     if is_heic:
-        img = Image.open(io.BytesIO(data))
         dest = dest.with_suffix(".jpg")
-        img.save(dest, format="JPEG", quality=90)
+        fmt = "JPEG"
     else:
-        dest.write_bytes(data)
+        fmt = "JPEG" if ext in (".jpg", ".jpeg") else ext.lstrip(".").upper()
+    dest.write_bytes(_compress_bytes(img, fmt))
     return dest.name
 
 
