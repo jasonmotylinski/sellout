@@ -40,6 +40,9 @@
     {% if item.description %}
     <p class="detail-desc">{{ item.description }}</p>
     {% endif %}
+    {% if item.status != 'sold' %}
+    <a class="contact-btn" href="mailto:montrose.seller@gmail.com?subject=Interested in: {{ item.title | urlencode }}">Contact to buy</a>
+    {% endif %}
   </div>
 
 </div>
