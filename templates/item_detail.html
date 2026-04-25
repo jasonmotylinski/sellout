@@ -41,7 +41,10 @@
     <p class="detail-desc">{{ item.description }}</p>
     {% endif %}
     {% if item.status != 'sold' %}
-    <a class="contact-btn" href="mailto:montrose.seller@gmail.com?subject=Interested in: {{ item.title | urlencode }}">Contact to buy</a>
+    <div class="contact-block">
+      <p class="contact-label">Interested? Get in touch:</p>
+      <a class="contact-email" href="mailto:montrose.seller@gmail.com?subject=Interested in: {{ item.title | urlencode }}">montrose.seller@gmail.com</a>
+    </div>
     {% endif %}
   </div>
 

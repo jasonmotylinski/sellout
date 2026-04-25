@@ -564,21 +564,27 @@
       line-height: 1.6;
     }
 
-    .contact-btn {
-      display: inline-block;
+    .contact-block {
       margin-top: 1.5rem;
-      padding: 0.75rem 1.5rem;
-      background: var(--espresso);
-      color: var(--cream);
-      font-family: var(--sans);
-      font-size: 0.875rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      text-decoration: none;
-      border-radius: 2px;
-      transition: opacity 0.15s;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
     }
-    .contact-btn:hover { opacity: 0.8; }
+    .contact-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--mid);
+      margin: 0 0 0.4rem;
+    }
+    .contact-email {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      color: var(--espresso);
+      text-decoration: none;
+      border-bottom: 1px solid currentColor;
+    }
+    .contact-email:hover { opacity: 0.7; }
 
     /* ── Lightbox ───────────────────────────────── */
     .detail-main-img--zoomable { cursor: zoom-in; }
