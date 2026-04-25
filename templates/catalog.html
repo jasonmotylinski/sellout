@@ -8,6 +8,7 @@
 {% else %}
 <div class="item-grid">
 {% for item, images in items_with_images %}
+<a href="/items/{{ item.id }}" class="item-card-link">
 <article class="item-card{% if item.status == 'sold' %} item-card--sold{% endif %}">
   <div class="item-card__img">
     {% if images %}
@@ -23,6 +24,7 @@
     <span class="badge badge--{{ item.status }}">{{ item.status }}</span>
   </div>
 </article>
+</a>
 {% endfor %}
 </div>
 {% endif %}

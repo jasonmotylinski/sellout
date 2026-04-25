@@ -69,3 +69,9 @@ def test_item_detail_loads(client):
 def test_item_detail_404(client):
     response = client.get("/items/999")
     assert response.status_code == 404
+
+
+def test_catalog_cards_link_to_detail(client):
+    client.post("/admin/items/new", data={"title": "Mirror", "description": "", "price": "30.00", "status": "available"})
+    response = client.get("/")
+    assert 'href="/items/1"' in response.text
