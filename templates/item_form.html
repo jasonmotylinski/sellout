@@ -116,14 +116,16 @@
 
   function render() {
     preview.querySelectorAll('img').forEach(function (img) {
-      URL.revokeObjectURL(img.src);
+      if (img.src) URL.revokeObjectURL(img.src);
     });
     preview.innerHTML = '';
     accumulated.forEach(function (file, idx) {
       var wrap = document.createElement('div');
       wrap.className = 'img-grid__item';
       var img = document.createElement('img');
-      img.src = URL.createObjectURL(file);
+      var isHeic = /\.heic$/i.test(file.name) || file.type === 'image/heic' || file.type === 'image/heif';
+      img.src = isHeic ? '' : URL.createObjectURL(file);
+      if (isHeic) { img.style.cssText = 'background:var(--cream-alt);display:block;width:100%;height:100%'; }
       var del = document.createElement('button');
       del.type = 'button';
       del.className = 'img-del';

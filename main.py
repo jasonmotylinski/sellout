@@ -50,7 +50,11 @@ def _items_with_images():
 
 async def _save_image(upload: UploadFile, dest: Path, ext: str):
     data = await upload.read()
-    is_heic = ext == ".heic" or (upload.content_type or "").lower() in {"image/heic", "image/heif"}
+    is_heic = (
+        ext == ".heic"
+        or (upload.content_type or "").lower() in {"image/heic", "image/heif"}
+        or pillow_heif.is_supported(io.BytesIO(data))
+    )
     if is_heic:
         img = Image.open(io.BytesIO(data))
         dest = dest.with_suffix(".jpg")
