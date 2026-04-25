@@ -82,6 +82,8 @@ def delete_image(image_id: int):
 
 def set_cover_image(item_id: int, image_id: int):
     images = get_images(item_id)
+    if not any(img["id"] == image_id for img in images):
+        raise ValueError(f"image {image_id} does not belong to item {item_id}")
     ordered = [img for img in images if img["id"] == image_id] + \
               [img for img in images if img["id"] != image_id]
     for i, img in enumerate(ordered):

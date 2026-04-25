@@ -71,3 +71,12 @@ def test_set_cover_image():
     assert images[0]["id"] == img_b   # b is now first
     assert images[1]["id"] == img_a   # a is second
     assert images[2]["id"] == img_c   # c is third
+
+
+def test_set_cover_image_wrong_item_raises():
+    item_a = database.create_item("A", "", 1.0, "available")
+    item_b = database.create_item("B", "", 2.0, "available")
+    img_b = database.add_image(item_b, "b.jpg", sort_order=0)
+
+    with pytest.raises(ValueError):
+        database.set_cover_image(item_a, img_b)
