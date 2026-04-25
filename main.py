@@ -93,10 +93,13 @@ async def _save_image(upload: UploadFile, dest: Path, ext: str):
 
 # ── API ─────────────────────────────────────────
 
+CATEGORIES = ["Bedroom", "Living Room", "Office", "Tools", "Outdoor", "Electronics", "Other"]
+
 class ItemPatch(BaseModel):
     title: str | None = None
     description: str | None = None
     price: float | None = None
+    category: str | None = None
 
 
 @app.get("/api/items")
@@ -125,6 +128,7 @@ def api_update_item(item_id: int, patch: ItemPatch, _=Depends(require_api_key)):
         description=patch.description if patch.description is not None else item["description"],
         price=patch.price if patch.price is not None else item["price"],
         status=item["status"],
+        category=patch.category if patch.category is not None else item["category"],
     )
     return dict(database.get_item(item_id))
 
@@ -155,6 +159,7 @@ def api_rotate_image(item_id: int, image_id: int, degrees: int = 90, _=Depends(r
 def public_catalog(request: Request):
     return templates.TemplateResponse(request, "catalog.html", {
         "items_with_images": _items_with_images(),
+        "categories": CATEGORIES,
     })
 
 
@@ -183,6 +188,7 @@ def new_item_form(request: Request, _=Depends(require_admin)):
     return templates.TemplateResponse(request, "item_form.html", {
         "item": None,
         "images": [],
+        "categories": CATEGORIES,
     })
 
 
@@ -192,10 +198,11 @@ async def create_item(
     description: str = Form(""),
     price: float = Form(...),
     status: Literal["available", "sold"] = Form("available"),
+    category: str = Form(""),
     images: List[UploadFile] = File(default=[]),
     _=Depends(require_admin),
 ):
-    item_id = database.create_item(title=title, description=description, price=price, status=status)
+    item_id = database.create_item(title=title, description=description, price=price, status=status, category=category)
     for i, image in enumerate(images):
         if image.filename:
             ext = Path(image.filename).suffix.lower()
@@ -216,6 +223,7 @@ def edit_item_form(item_id: int, request: Request, _=Depends(require_admin)):
     return templates.TemplateResponse(request, "item_form.html", {
         "item": item,
         "images": images,
+        "categories": CATEGORIES,
     })
 
 
@@ -226,12 +234,13 @@ async def update_item(
     description: str = Form(""),
     price: float = Form(...),
     status: Literal["available", "sold"] = Form("available"),
+    category: str = Form(""),
     images: List[UploadFile] = File(default=[]),
     _=Depends(require_admin),
 ):
     if database.get_item(item_id) is None:
         raise HTTPException(status_code=404)
-    database.update_item(item_id, title=title, description=description, price=price, status=status)
+    database.update_item(item_id, title=title, description=description, price=price, status=status, category=category)
     existing_count = len(database.get_images(item_id))
     for i, image in enumerate(images):
         if image.filename:

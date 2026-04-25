@@ -21,12 +21,20 @@
   </select>
 </div>
 
+<div class="category-bar" id="categoryBar">
+  <button class="category-pill category-pill--active" data-category="">All</button>
+  {% for cat in categories %}
+  <button class="category-pill" data-category="{{ cat }}">{{ cat }}</button>
+  {% endfor %}
+</div>
+
 <div class="item-grid" id="itemGrid">
 {% for item, images in items_with_images %}
 <a href="/items/{{ item.id }}" class="item-card-link"
    aria-label="{{ item.title }}"
    data-price="{{ item.price }}"
-   data-title="{{ item.title | lower }}">
+   data-title="{{ item.title | lower }}"
+   data-category="{{ item.category }}">
 <article class="item-card{% if item.status == 'sold' %} item-card--sold{% endif %}">
   <div class="item-card__img">
     {% if images %}
@@ -41,6 +49,7 @@
   <div class="item-card__footer">
     <span class="price">${{ "%.2f"|format(item.price) }}</span>
     <span class="badge badge--{{ item.status }}">{{ item.status }}</span>
+    {% if item.category %}<span class="badge" style="background:var(--cream-alt);color:var(--mid)">{{ item.category }}</span>{% endif %}
   </div>
 </article>
 </a>
@@ -51,6 +60,10 @@
   <p>No saved items yet — heart the ones you like.</p>
 </div>
 
+<div class="filter-empty" id="categoryEmpty" style="display:none">
+  <p>No items in this category.</p>
+</div>
+
 {% endif %}
 
 <script>
@@ -59,6 +72,7 @@
   var grid = document.getElementById('itemGrid');
   var showingFavs = false;
   var currentSort = 'default';
+  var selectedCategory = '';
 
   function getFavs() {
     try { return JSON.parse(localStorage.getItem(KEY)) || []; }
@@ -91,21 +105,27 @@
     var favs = getFavs();
     var cards = getCards();
 
-    // Sort into correct order in DOM
-    var sorted = sortCards(cards, currentSort);
-    sorted.forEach(function (card) { grid.appendChild(card); });
+    // Sort
+    sortCards(cards, currentSort).forEach(function (card) { grid.appendChild(card); });
 
-    // Apply filter visibility
-    var anyVisible = false;
+    // Filter
+    var anyFavVisible = false;
+    var anyCatVisible = false;
+
     getCards().forEach(function (card) {
       var id = parseInt(card.querySelector('.heart-btn').dataset.id);
-      var show = !showingFavs || favs.indexOf(id) !== -1;
+      var cat = card.dataset.category;
+      var favOk = !showingFavs || favs.indexOf(id) !== -1;
+      var catOk = !selectedCategory || cat === selectedCategory;
+      var show = favOk && catOk;
       card.style.display = show ? '' : 'none';
-      if (show) anyVisible = true;
+      if (show) { anyFavVisible = true; anyCatVisible = true; }
     });
 
     document.getElementById('favsEmpty').style.display =
-      (showingFavs && !anyVisible) ? '' : 'none';
+      (showingFavs && !anyFavVisible) ? '' : 'none';
+    document.getElementById('categoryEmpty').style.display =
+      (selectedCategory && !anyCatVisible) ? '' : 'none';
   }
 
   // Init hearts
@@ -129,7 +149,7 @@
     });
   });
 
-  // Tab switching
+  // Favorites tabs
   var tabAll  = document.getElementById('tabAll');
   var tabFavs = document.getElementById('tabFavs');
 
@@ -157,6 +177,17 @@
   document.getElementById('sortSelect').addEventListener('change', function () {
     currentSort = this.value;
     render();
+  });
+
+  // Category pills
+  document.querySelectorAll('.category-pill').forEach(function (pill) {
+    pill.addEventListener('click', function () {
+      selectedCategory = pill.dataset.category;
+      document.querySelectorAll('.category-pill').forEach(function (p) {
+        p.classList.toggle('category-pill--active', p === pill);
+      });
+      render();
+    });
   });
 }());
 </script>

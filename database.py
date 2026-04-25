@@ -25,14 +25,19 @@ def init_db(path: str = "catalog.db") -> sqlite3.Connection:
             sort_order INTEGER NOT NULL DEFAULT 0
         );
     """)
+    try:
+        _conn.execute("ALTER TABLE items ADD COLUMN category TEXT NOT NULL DEFAULT ''")
+        _conn.commit()
+    except Exception:
+        pass  # column already exists
     _conn.commit()
     return _conn
 
 
-def create_item(title: str, description: str, price: float, status: str) -> int:
+def create_item(title: str, description: str, price: float, status: str, category: str = "") -> int:
     cur = _conn.execute(
-        "INSERT INTO items (title, description, price, status) VALUES (?, ?, ?, ?)",
-        (title, description, price, status),
+        "INSERT INTO items (title, description, price, status, category) VALUES (?, ?, ?, ?, ?)",
+        (title, description, price, status, category),
     )
     _conn.commit()
     return cur.lastrowid
@@ -46,10 +51,10 @@ def list_items() -> list:
     return _conn.execute("SELECT * FROM items ORDER BY created_at DESC").fetchall()
 
 
-def update_item(item_id: int, title: str, description: str, price: float, status: str):
+def update_item(item_id: int, title: str, description: str, price: float, status: str, category: str = ""):
     _conn.execute(
-        "UPDATE items SET title=?, description=?, price=?, status=? WHERE id=?",
-        (title, description, price, status, item_id),
+        "UPDATE items SET title=?, description=?, price=?, status=?, category=? WHERE id=?",
+        (title, description, price, status, category, item_id),
     )
     _conn.commit()
 
