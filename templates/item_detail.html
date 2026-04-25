@@ -17,7 +17,8 @@
       <button
         class="thumb{% if loop.first %} thumb--active{% endif %}"
         data-src="/uploads/{{ img.filename }}"
-        aria-label="View image {{ loop.index }}"
+        aria-label="{{ item.title }}, image {{ loop.index }} of {{ images|length }}"
+        aria-pressed="{{ 'true' if loop.first else 'false' }}"
       >
         <img src="/uploads/{{ img.filename }}" alt="">
       </button>
@@ -51,8 +52,10 @@
         mainImg.src = btn.dataset.src;
         document.querySelectorAll('.thumb').forEach(function (b) {
           b.classList.remove('thumb--active');
+          b.setAttribute('aria-pressed', 'false');
         });
         btn.classList.add('thumb--active');
+        btn.setAttribute('aria-pressed', 'true');
       });
     });
   });
