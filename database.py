@@ -78,3 +78,12 @@ def get_images(item_id: int) -> list:
 def delete_image(image_id: int):
     _conn.execute("DELETE FROM item_images WHERE id = ?", (image_id,))
     _conn.commit()
+
+
+def set_cover_image(item_id: int, image_id: int):
+    images = get_images(item_id)
+    ordered = [img for img in images if img["id"] == image_id] + \
+              [img for img in images if img["id"] != image_id]
+    for i, img in enumerate(ordered):
+        _conn.execute("UPDATE item_images SET sort_order = ? WHERE id = ?", (i, img["id"]))
+    _conn.commit()

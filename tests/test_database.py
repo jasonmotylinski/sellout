@@ -57,3 +57,17 @@ def test_delete_item_cascades_images():
     database.add_image(item_id, filename="img.jpg", sort_order=0)
     database.delete_item(item_id)
     assert database.get_images(item_id) == []
+
+
+def test_set_cover_image():
+    item_id = database.create_item("Desk", "", 100.0, "available")
+    img_a = database.add_image(item_id, "a.jpg", sort_order=0)
+    img_b = database.add_image(item_id, "b.jpg", sort_order=1)
+    img_c = database.add_image(item_id, "c.jpg", sort_order=2)
+
+    database.set_cover_image(item_id, img_b)
+
+    images = database.get_images(item_id)
+    assert images[0]["id"] == img_b   # b is now first
+    assert images[1]["id"] == img_a   # a is second
+    assert images[2]["id"] == img_c   # c is third
