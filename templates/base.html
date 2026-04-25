@@ -210,6 +210,19 @@
     .form-input:focus { outline: none; border-color: var(--espresso); }
     textarea.form-input { min-height: 90px; resize: vertical; }
 
+    .drop-zone {
+      border: 1.5px dashed var(--border-mid);
+      border-radius: var(--r);
+      padding: 1rem;
+      margin-top: 0.5rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .drop-zone--active { border-color: var(--espresso); background: var(--cream-alt); color: var(--espresso); }
+
     /* ── Image grids ────────────────────────────── */
     .img-grid, .preview-grid {
       display: grid;

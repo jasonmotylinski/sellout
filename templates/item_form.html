@@ -47,6 +47,7 @@
     <div class="preview-grid" id="newPreviews"></div>
     <input type="file" name="images" accept="image/*" multiple id="imageInput" style="display:none">
     <button type="button" class="btn btn--outline btn--block" id="addPhotosBtn">Add photos</button>
+    <div class="drop-zone" id="dropZone">or drag photos here</div>
   </div>
   <button type="submit" class="btn btn--primary btn--block">Save item</button>
 </form>
@@ -64,6 +65,7 @@
   var accumulated = [];
   var input = document.getElementById('imageInput');
   var addBtn = document.getElementById('addPhotosBtn');
+  var dropZone = document.getElementById('dropZone');
   var preview = document.getElementById('newPreviews');
 
   addBtn.addEventListener('click', function () {
@@ -72,7 +74,24 @@
   });
 
   input.addEventListener('change', function (e) {
-    Array.from(e.target.files).forEach(function (file) {
+    addFiles(e.target.files);
+  });
+
+  dropZone.addEventListener('dragover', function (e) {
+    e.preventDefault();
+    dropZone.classList.add('drop-zone--active');
+  });
+  dropZone.addEventListener('dragleave', function () {
+    dropZone.classList.remove('drop-zone--active');
+  });
+  dropZone.addEventListener('drop', function (e) {
+    e.preventDefault();
+    dropZone.classList.remove('drop-zone--active');
+    addFiles(e.dataTransfer.files);
+  });
+
+  function addFiles(files) {
+    Array.from(files).forEach(function (file) {
       var dup = accumulated.some(function (f) {
         return f.name === file.name && f.size === file.size && f.lastModified === file.lastModified;
       });
@@ -80,7 +99,7 @@
     });
     syncInput();
     render();
-  });
+  }
 
   function syncInput() {
     var dt = new DataTransfer();
