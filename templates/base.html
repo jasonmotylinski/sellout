@@ -323,6 +323,92 @@
       .item-card { animation: none; }
       .item-card__img img { transition: none; }
     }
+
+    /* ── Item detail layout ─────────────────────── */
+    .item-card-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .detail-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+    }
+    @media (min-width: 600px) {
+      .detail-layout { grid-template-columns: 1fr 1fr; align-items: start; }
+    }
+
+    .detail-main-img {
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      background: var(--cream-alt);
+      border-radius: var(--r);
+      margin-bottom: 0.75rem;
+    }
+    .detail-main-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: opacity 0.2s;
+    }
+    .detail-main-img--empty {
+      display: flex; align-items: center; justify-content: center;
+      color: var(--border-mid);
+      font-size: 2rem;
+    }
+
+    .thumb-strip {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.25rem;
+    }
+
+    .thumb {
+      flex-shrink: 0;
+      width: 64px; height: 64px;
+      border: 2px solid transparent;
+      border-radius: var(--r);
+      overflow: hidden;
+      cursor: pointer;
+      padding: 0;
+      background: none;
+      transition: border-color 0.15s;
+    }
+    .thumb img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .thumb--active { border-color: var(--espresso); }
+    .thumb:hover:not(.thumb--active) { border-color: var(--border-mid); }
+
+    .detail-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .detail-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      font-weight: 500;
+      line-height: 1.15;
+    }
+
+    .detail-price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+    }
+
+    .detail-desc {
+      font-size: 0.95rem;
+      color: var(--mid);
+      line-height: 1.6;
+    }
   </style>
 </head>
 <body>
