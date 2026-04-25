@@ -75,3 +75,16 @@ def test_catalog_cards_link_to_detail(client):
     client.post("/admin/items/new", data={"title": "Mirror", "description": "", "price": "30.00", "status": "available"})
     response = client.get("/")
     assert 'href="/items/1"' in response.text
+
+
+def test_set_cover_image(client):
+    client.post("/admin/items/new", data={"title": "Shelf", "description": "", "price": "20.00", "status": "available"})
+    import database
+    img_a = database.add_image(1, "a.jpg", sort_order=0)
+    img_b = database.add_image(1, "b.jpg", sort_order=1)
+
+    response = client.post(f"/admin/items/1/images/{img_b}/set-cover", follow_redirects=False)
+
+    assert response.status_code == 303
+    images = database.get_images(1)
+    assert images[0]["id"] == img_b

@@ -167,3 +167,11 @@ def delete_image_route(item_id: int, image_id: int, _=Depends(require_admin)):
             database.delete_image(image_id)
             break
     return RedirectResponse(f"/admin/items/{item_id}/edit", status_code=303)
+
+
+@app.post("/admin/items/{item_id}/images/{image_id}/set-cover")
+def set_cover_image_route(item_id: int, image_id: int, _=Depends(require_admin)):
+    if database.get_item(item_id) is None:
+        raise HTTPException(status_code=404)
+    database.set_cover_image(item_id, image_id)
+    return RedirectResponse(f"/admin/items/{item_id}/edit", status_code=303)
