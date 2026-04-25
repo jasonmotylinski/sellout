@@ -15,7 +15,7 @@
       <span class="img-cover-badge">Cover</span>
     {% else %}
       <form method="post" action="/admin/items/{{ item.id }}/images/{{ img.id }}/set-cover">
-        <button type="submit" class="img-cover" title="Set as thumbnail">★</button>
+        <button type="submit" class="img-cover" title="Set as cover" aria-label="Set as cover">★</button>
       </form>
     {% endif %}
     <form method="post" action="/admin/items/{{ item.id }}/images/{{ img.id }}/delete">
