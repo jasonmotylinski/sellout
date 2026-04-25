@@ -247,6 +247,26 @@
       transition: background 0.15s;
     }
     .img-del:hover { background: oklch(15% 0.01 60 / 0.85); }
+    .img-cover {
+      position: absolute; top: 4px; left: 4px;
+      background: oklch(15% 0.01 60 / 0.6);
+      color: white;
+      border: none; border-radius: 50%;
+      width: 22px; height: 22px;
+      font-size: 12px; line-height: 22px;
+      text-align: center; cursor: pointer; padding: 0;
+      transition: background 0.15s;
+    }
+    .img-cover:hover { background: oklch(15% 0.01 60 / 0.85); }
+    .img-cover-badge {
+      position: absolute; top: 4px; left: 4px;
+      background: oklch(55% 0.08 75 / 0.85);
+      color: white;
+      border-radius: 3px;
+      font-size: 0.6rem; font-family: 'DM Sans', sans-serif;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 2px 5px; pointer-events: none;
+    }
 
     /* ── Admin list ─────────────────────────────── */
     .admin-row {

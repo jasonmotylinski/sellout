@@ -11,6 +11,13 @@
   {% for img in images %}
   <div class="img-grid__item">
     <img src="/uploads/{{ img.filename }}" alt="photo">
+    {% if loop.first %}
+      <span class="img-cover-badge">Cover</span>
+    {% else %}
+      <form method="post" action="/admin/items/{{ item.id }}/images/{{ img.id }}/set-cover">
+        <button type="submit" class="img-cover" title="Set as thumbnail">★</button>
+      </form>
+    {% endif %}
     <form method="post" action="/admin/items/{{ item.id }}/images/{{ img.id }}/delete">
       <button type="submit" class="img-del" title="Remove">×</button>
     </form>
