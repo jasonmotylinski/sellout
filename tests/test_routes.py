@@ -80,6 +80,54 @@ def test_catalog_cards_link_to_detail(client):
     assert 'href="/items/1"' in response.text
 
 
+def test_api_requires_auth(client):
+    response = client.get("/api/items")
+    assert response.status_code == 401
+
+
+def test_api_list_items(client):
+    client.post("/admin/items/new", data={"title": "Chair", "description": "Oak", "price": "120.00", "status": "available"})
+    response = client.get("/api/items", headers={"Authorization": "Bearer test"})
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["title"] == "Chair"
+    assert data[0]["description"] == "Oak"
+
+
+def test_api_get_item(client):
+    client.post("/admin/items/new", data={"title": "Table", "description": "Pine", "price": "200.00", "status": "available"})
+    response = client.get("/api/items/1", headers={"Authorization": "Bearer test"})
+    assert response.status_code == 200
+    assert response.json()["title"] == "Table"
+
+
+def test_api_get_item_404(client):
+    response = client.get("/api/items/999", headers={"Authorization": "Bearer test"})
+    assert response.status_code == 404
+
+
+def test_api_patch_item(client):
+    client.post("/admin/items/new", data={"title": "Old Title", "description": "Old desc", "price": "50.00", "status": "available"})
+    response = client.patch("/api/items/1", json={"title": "New Title", "description": "New desc"}, headers={"Authorization": "Bearer test"})
+    assert response.status_code == 200
+    assert response.json()["title"] == "New Title"
+    assert response.json()["description"] == "New desc"
+
+
+def test_api_patch_partial(client):
+    client.post("/admin/items/new", data={"title": "Keep Me", "description": "Old desc", "price": "50.00", "status": "available"})
+    response = client.patch("/api/items/1", json={"description": "Better desc"}, headers={"Authorization": "Bearer test"})
+    assert response.status_code == 200
+    assert response.json()["title"] == "Keep Me"
+    assert response.json()["description"] == "Better desc"
+
+
+def test_api_patch_404(client):
+    response = client.patch("/api/items/999", json={"title": "X"}, headers={"Authorization": "Bearer test"})
+    assert response.status_code == 404
+
+
 def test_set_cover_image(client):
     client.post("/admin/items/new", data={"title": "Shelf", "description": "", "price": "20.00", "status": "available"})
     img_a = database.add_image(1, "a.jpg", sort_order=0)

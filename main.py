@@ -12,11 +12,12 @@ import pillow_heif
 from PIL import Image, ImageOps
 pillow_heif.register_heif_opener()
 
-from fastapi import Depends, FastAPI, HTTPException, Request, UploadFile, File, Form
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, UploadFile, File, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
 
 import database
 
@@ -25,6 +26,7 @@ UPLOADS_DIR = os.environ.get("UPLOADS_DIR", "uploads")
 ALLOWED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".heic"}
 ADMIN_USER = os.environ.get("ADMIN_USER", "admin")
 ADMIN_PASS = os.environ.get("ADMIN_PASS", "admin")
+API_KEY = os.environ.get("API_KEY", ADMIN_PASS)
 
 _security = HTTPBasic()
 
@@ -34,6 +36,11 @@ def require_admin(credentials: HTTPBasicCredentials = Depends(_security)):
          secrets.compare_digest(credentials.password, ADMIN_PASS)
     if not ok:
         raise HTTPException(status_code=401, headers={"WWW-Authenticate": "Basic"})
+
+
+def require_api_key(authorization: str | None = Header(default=None)):
+    if not authorization or not secrets.compare_digest(authorization, f"Bearer {API_KEY}"):
+        raise HTTPException(status_code=401, detail="Invalid API key")
 
 Path(UPLOADS_DIR).mkdir(exist_ok=True)
 database.init_db(DB_PATH)
@@ -83,6 +90,45 @@ async def _save_image(upload: UploadFile, dest: Path, ext: str):
     dest.write_bytes(_compress_bytes(img, fmt))
     return dest.name
 
+
+# ── API ─────────────────────────────────────────
+
+class ItemPatch(BaseModel):
+    title: str | None = None
+    description: str | None = None
+
+
+@app.get("/api/items")
+def api_list_items(_=Depends(require_api_key)):
+    items = database.list_items()
+    return [dict(item) for item in items]
+
+
+@app.get("/api/items/{item_id}")
+def api_get_item(item_id: int, _=Depends(require_api_key)):
+    row = database.get_item(item_id)
+    if row is None:
+        raise HTTPException(status_code=404)
+    return dict(row)
+
+
+@app.patch("/api/items/{item_id}")
+def api_update_item(item_id: int, patch: ItemPatch, _=Depends(require_api_key)):
+    row = database.get_item(item_id)
+    if row is None:
+        raise HTTPException(status_code=404)
+    item = dict(row)
+    database.update_item(
+        item_id,
+        title=patch.title if patch.title is not None else item["title"],
+        description=patch.description if patch.description is not None else item["description"],
+        price=item["price"],
+        status=item["status"],
+    )
+    return dict(database.get_item(item_id))
+
+
+# ── HTML ─────────────────────────────────────────
 
 @app.get("/", response_class=HTMLResponse)
 def public_catalog(request: Request):
