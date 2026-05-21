@@ -157,8 +157,9 @@ def api_rotate_image(item_id: int, image_id: int, degrees: int = 90, _=Depends(r
 
 @app.get("/", response_class=HTMLResponse)
 def public_catalog(request: Request):
+    items_with_images = [(item, images) for item, images in _items_with_images() if item["status"] == "available"]
     return templates.TemplateResponse(request, "catalog.html", {
-        "items_with_images": _items_with_images(),
+        "items_with_images": items_with_images,
         "categories": CATEGORIES,
     })
 
